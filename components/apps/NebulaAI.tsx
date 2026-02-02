@@ -5,7 +5,7 @@ import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 const NebulaAI: React.FC = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
-    { role: 'model', text: 'Hello, I am Nebula AI. How can I assist you today?' }
+    { role: 'model', text: 'Nebula System ready. How may I assist your workflow today?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,15 +36,15 @@ const NebulaAI: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-900/20 dark:to-blue-900/20">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex flex-col h-full bg-white">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-10 space-y-6">
         {messages.map((m, idx) => (
           <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`
-              max-w-[80%] px-4 py-2 rounded-2xl text-sm
+              max-w-[70%] px-5 py-3 rounded-2xl text-[14px] leading-relaxed
               ${m.role === 'user' 
-                ? 'bg-purple-600 text-white rounded-tr-none shadow-lg' 
-                : 'bg-white/80 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 rounded-tl-none border border-black/5'}
+                ? 'bg-stone-900 text-white shadow-xl' 
+                : 'bg-stone-50 border border-stone-100 text-stone-800'}
             `}>
               {m.text}
             </div>
@@ -52,33 +52,33 @@ const NebulaAI: React.FC = () => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-             <div className="bg-white/80 dark:bg-gray-800/80 p-4 rounded-2xl rounded-tl-none animate-pulse">
+             <div className="bg-stone-50 p-4 rounded-2xl border border-stone-100">
                 <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-100"></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-200"></div>
+                  <div className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse delay-75"></div>
+                  <div className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-pulse delay-150"></div>
                 </div>
              </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 border-t border-black/5 bg-white/20">
+      <div className="p-6 border-t border-stone-50 bg-white">
         <div className="relative flex items-center">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask anything..."
-            className="w-full bg-white/60 dark:bg-gray-800/60 border border-black/10 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+            placeholder="Search or ask Nebula..."
+            className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-1 focus:ring-stone-200 transition-all text-stone-800 placeholder-stone-400"
           />
           <button 
             onClick={handleSend}
             disabled={isLoading}
-            className="absolute right-2 p-2 text-purple-600 hover:text-purple-700 disabled:opacity-50"
+            className="absolute right-4 p-2 text-stone-400 hover:text-stone-900 disabled:opacity-30 transition-colors"
           >
-            <PaperAirplaneIcon className="w-6 h-6" />
+            <PaperAirplaneIcon className="w-6 h-6 stroke-[1.5px]" />
           </button>
         </div>
       </div>

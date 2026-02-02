@@ -2,52 +2,44 @@
 import React, { useState } from 'react';
 
 const Terminal: React.FC = () => {
-  const [history, setHistory] = useState<string[]>(['Welcome to Nebula Terminal v3.1', 'Type "help" for a list of commands.']);
+  const [history, setHistory] = useState<string[]>(['Nebula Shell v3.1 [Clean Console]', 'Initializing system core... Ready.']);
   const [input, setInput] = useState('');
 
   const handleCommand = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       const cmd = input.trim().toLowerCase();
-      let response = `nebula: command not found: ${cmd}`;
+      let response = `shell: command not found: ${cmd}`;
 
-      if (cmd === 'help') response = 'Available commands: help, clear, neofetch, whoami, nebula';
+      if (cmd === 'help') response = 'Commands: help, clear, sys, whoami';
       if (cmd === 'clear') {
         setHistory([]);
         setInput('');
         return;
       }
-      if (cmd === 'neofetch') {
-        response = `
-          \r\r   .-.        Nebula OS 3.1
-          \r\r  (o o)       --------------
-          \r\r  | O |       Kernel: 6.8.0-nebula-core
-          \r\r   '-'        Uptime: 14 mins
-          \r\r              Shell: nebula-sh
-          \r\r              Resolution: 2560x1440
-          \r\r              DE: Nebula Desktop (GTK4+)
-        `;
+      if (cmd === 'sys') {
+        response = `NEBULA OS | v3.1 | MONO CORE`;
       }
-      if (cmd === 'whoami') response = 'root@nebula-workstation';
-      if (cmd === 'nebula') response = 'Nebula OS is the pinnacle of desktop computing.';
+      if (cmd === 'whoami') response = 'nebula_user';
 
-      setHistory(prev => [...prev, `> ${input}`, response]);
+      setHistory(prev => [...prev, `$ ${input}`, response]);
       setInput('');
     }
   };
 
   return (
-    <div className="h-full bg-gray-950 p-4 font-mono text-sm text-green-400 overflow-y-auto">
+    <div className="h-full bg-stone-50 p-8 font-mono text-[13px] text-stone-700 overflow-y-auto selection:bg-stone-200">
       {history.map((line, idx) => (
-        <pre key={idx} className="whitespace-pre-wrap mb-1">{line}</pre>
+        <pre key={idx} className="whitespace-pre-wrap mb-2 leading-relaxed">{line}</pre>
       ))}
-      <div className="flex items-center">
-        <span className="mr-2 text-blue-400">root@nebula:~#</span>
+      <div className="flex items-center mt-4">
+        <span className="mr-3 text-stone-400 font-bold">$</span>
         <input
           autoFocus
-          className="bg-transparent border-none outline-none flex-1 text-green-400"
+          className="bg-transparent border-none outline-none flex-1 text-stone-900 font-bold"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleCommand}
+          placeholder="_"
         />
       </div>
     </div>

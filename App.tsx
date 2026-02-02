@@ -8,13 +8,19 @@ import Window from './components/Window';
 import Explorer from './components/apps/Explorer';
 import Terminal from './components/apps/Terminal';
 import NebulaAI from './components/apps/NebulaAI';
+import Overview from './components/Overview';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const App: React.FC = () => {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [zIndexCounter, setZIndexCounter] = useState(10);
+  const [isLauncherOpen, setIsLauncherOpen] = useState(false);
+  const [isOverviewOpen, setIsOverviewOpen] = useState(false);
 
   const launchApp = useCallback((appId: AppID) => {
-    // If already open, just focus
+    setIsLauncherOpen(false);
+    setIsOverviewOpen(false);
+    
     const existing = windows.find(w => w.appId === appId);
     if (existing) {
       focusWindow(existing.id);
@@ -32,8 +38,8 @@ const App: React.FC = () => {
       isMaximized: false,
       isFocused: true,
       zIndex: zIndexCounter + 1,
-      position: { x: 100 + windows.length * 40, y: 100 + windows.length * 40 },
-      size: { width: 800, height: 600 }
+      position: { x: 150 + windows.length * 30, y: 150 + windows.length * 30 },
+      size: { width: 840, height: 540 }
     };
 
     setZIndexCounter(prev => prev + 1);
@@ -51,6 +57,12 @@ const App: React.FC = () => {
       isFocused: w.id === id,
       zIndex: w.id === id ? zIndexCounter + 1 : w.zIndex
     })));
+    setIsOverviewOpen(false);
+  };
+
+  const toggleOverview = () => {
+    setIsOverviewOpen(!isOverviewOpen);
+    setIsLauncherOpen(false);
   };
 
   const renderAppContent = (appId: AppID) => {
@@ -59,9 +71,9 @@ const App: React.FC = () => {
       case 'terminal': return <Terminal />;
       case 'nebula-ai': return <NebulaAI />;
       default: return (
-        <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center">
-          <p className="text-lg font-medium">This application is under construction.</p>
-          <p className="text-sm">The Nebula OS core team is working on these modules.</p>
+        <div className="flex flex-col items-center justify-center h-full text-stone-300 p-8 text-center bg-white">
+          <p className="text-xl font-light uppercase tracking-widest text-stone-900">System Unavailable</p>
+          <p className="text-sm mt-2 text-stone-400">Core module pending deployment.</p>
         </div>
       );
     }
@@ -70,18 +82,24 @@ const App: React.FC = () => {
   const focusedAppId = windows.find(w => w.isFocused)?.appId;
 
   return (
-    <div 
-      className="relative w-screen h-screen overflow-hidden bg-cover bg-center transition-all duration-1000"
-      style={{ backgroundImage: `url(${WALLPAPER_URL})` }}
-    >
-      {/* Dynamic Overlay for depth */}
-      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+    <div className="relative w-screen h-screen overflow-hidden bg-stone-100 transition-all duration-1000">
+      {/* Base Wallpaper */}
+      <div 
+        className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${
+          isLauncherOpen || isOverviewOpen ? 'scale-110 blur-3xl saturate-50 brightness-110' : 'scale-100 blur-0'
+        }`}
+        style={{ backgroundImage: `url(${WALLPAPER_URL})` }}
+      />
+      
+      <div className="absolute inset-0 bg-white/5 pointer-events-none" />
 
       {/* Shell Components */}
-      <TopBar />
+      <TopBar onToggleOverview={toggleOverview} isOverviewOpen={isOverviewOpen} />
 
       {/* Window Manager Workspace */}
-      <div className="relative w-full h-[calc(100vh-32px)]">
+      <div className={`relative w-full h-full transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        isOverviewOpen ? 'scale-90 opacity-40 blur-sm pointer-events-none' : 'scale-100 opacity-100'
+      }`}>
         {windows.map((win) => (
           <Window
             key={win.id}
@@ -98,16 +116,55 @@ const App: React.FC = () => {
         ))}
       </div>
 
+      {/* Overview (Activities) View */}
+      {isOverviewOpen && (
+        <Overview 
+          windows={windows} 
+          onFocusWindow={focusWindow} 
+          onClose={() => setIsOverviewOpen(false)}
+        />
+      )}
+
+      {/* Launchpad Overlay */}
+      {isLauncherOpen && (
+        <div className="absolute inset-0 z-[2000] flex items-center justify-center p-20 animate-in fade-in zoom-in duration-300">
+           <div className="w-full max-w-5xl">
+              <div className="flex justify-between items-center mb-16">
+                 <h2 className="text-5xl font-extralight text-stone-900 tracking-tighter">Surface Apps</h2>
+                 <button 
+                  onClick={() => setIsLauncherOpen(false)}
+                  className="p-4 rounded-full bg-white/20 hover:bg-white/40 border border-white/40 transition-all"
+                 >
+                    <XMarkIcon className="w-8 h-8 text-stone-800" />
+                 </button>
+              </div>
+              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-12">
+                {APPS.map((app) => (
+                  <button 
+                    key={app.id} 
+                    onClick={() => launchApp(app.id)}
+                    className="flex flex-col items-center group gap-4"
+                  >
+                    <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center ${app.color} shadow-2xl transition-all duration-500 transform group-hover:scale-110 group-active:scale-95 group-hover:-translate-y-4`}>
+                      <div className="scale-[1.8]">{app.icon}</div>
+                    </div>
+                    <span className="text-stone-800 font-semibold text-sm tracking-wide opacity-60 group-hover:opacity-100 transition-opacity">
+                      {app.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* Bottom Shell */}
       <Dock 
         onLaunch={launchApp} 
+        onToggleLauncher={() => setIsLauncherOpen(!isLauncherOpen)}
         activeApps={windows.map(w => w.appId)}
         focusedAppId={focusedAppId}
       />
-
-      {/* Aesthetic Background Accents (Blurred blobs) */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none delay-1000" />
     </div>
   );
 };
