@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { WALLPAPER_URL, APPS } from './constants';
+import { DEFAULT_WALLPAPER, APPS } from './constants';
 import { WindowState, AppID } from './types';
 import TopBar from './components/TopBar';
 import Dock from './components/Dock';
@@ -8,14 +8,22 @@ import Window from './components/Window';
 import Explorer from './components/apps/Explorer';
 import Terminal from './components/apps/Terminal';
 import NebulaAI from './components/apps/NebulaAI';
+import Settings from './components/apps/Settings';
+import Weather from './components/apps/Weather';
 import Overview from './components/Overview';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+
+const APPS_PER_PAGE = 20;
 
 const App: React.FC = () => {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [zIndexCounter, setZIndexCounter] = useState(10);
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
+  const [launcherPage, setLauncherPage] = useState(0);
+  const [wallpaper, setWallpaper] = useState(DEFAULT_WALLPAPER);
+
+  const totalPages = Math.ceil(APPS.length / APPS_PER_PAGE);
 
   const launchApp = useCallback((appId: AppID) => {
     setIsLauncherOpen(false);
@@ -38,7 +46,7 @@ const App: React.FC = () => {
       isMaximized: false,
       isFocused: true,
       zIndex: zIndexCounter + 1,
-      position: { x: 150 + windows.length * 30, y: 150 + windows.length * 30 },
+      position: { x: 200 + (windows.length % 5) * 40, y: 160 + (windows.length % 5) * 40 },
       size: { width: 840, height: 540 }
     };
 
@@ -70,10 +78,15 @@ const App: React.FC = () => {
       case 'explorer': return <Explorer />;
       case 'terminal': return <Terminal />;
       case 'nebula-ai': return <NebulaAI />;
+      case 'settings': return <Settings currentWallpaper={wallpaper} onWallpaperChange={setWallpaper} />;
+      case 'weather': return <Weather />;
       default: return (
         <div className="flex flex-col items-center justify-center h-full text-stone-300 p-8 text-center bg-white">
-          <p className="text-xl font-light uppercase tracking-widest text-stone-900">System Unavailable</p>
-          <p className="text-sm mt-2 text-stone-400">Core module pending deployment.</p>
+          <div className="w-24 h-24 mb-6 rounded-[32px] bg-stone-50 flex items-center justify-center border border-stone-100">
+             {APPS.find(a => a.id === appId)?.icon}
+          </div>
+          <p className="text-xl font-light uppercase tracking-widest text-stone-900">{appId} Interface</p>
+          <p className="text-[10px] mt-4 text-stone-400 font-black uppercase tracking-[0.4em]">Awaiting Module Sync</p>
         </div>
       );
     }
@@ -82,23 +95,20 @@ const App: React.FC = () => {
   const focusedAppId = windows.find(w => w.isFocused)?.appId;
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-stone-100 transition-all duration-1000">
-      {/* Base Wallpaper */}
+    <div className="relative w-screen h-screen overflow-hidden bg-[#fafafa] transition-all duration-1000">
       <div 
-        className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ${
-          isLauncherOpen || isOverviewOpen ? 'scale-110 blur-3xl saturate-50 brightness-110' : 'scale-100 blur-0'
+        className={`absolute inset-0 bg-cover bg-center transition-all duration-[1.2s] ease-[cubic-bezier(0.23,1,0.32,1)] ${
+          isLauncherOpen || isOverviewOpen ? 'scale-110 saturate-[0.8] brightness-110 blur-[60px]' : 'scale-100 blur-0'
         }`}
-        style={{ backgroundImage: `url(${WALLPAPER_URL})` }}
+        style={{ backgroundImage: `url(${wallpaper})` }}
       />
       
-      <div className="absolute inset-0 bg-white/5 pointer-events-none" />
+      <div className={`absolute inset-0 bg-white/5 pointer-events-none transition-opacity duration-1000 ${isOverviewOpen ? 'opacity-100' : 'opacity-0'}`} />
 
-      {/* Shell Components */}
       <TopBar onToggleOverview={toggleOverview} isOverviewOpen={isOverviewOpen} />
 
-      {/* Window Manager Workspace */}
-      <div className={`relative w-full h-full transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-        isOverviewOpen ? 'scale-90 opacity-40 blur-sm pointer-events-none' : 'scale-100 opacity-100'
+      <div className={`relative w-full h-full transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+        isOverviewOpen ? 'scale-90 opacity-0 blur-2xl pointer-events-none' : 'scale-100 opacity-100'
       }`}>
         {windows.map((win) => (
           <Window
@@ -116,7 +126,6 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      {/* Overview (Activities) View */}
       {isOverviewOpen && (
         <Overview 
           windows={windows} 
@@ -125,43 +134,84 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Launchpad Overlay */}
       {isLauncherOpen && (
-        <div className="absolute inset-0 z-[2000] flex items-center justify-center p-20 animate-in fade-in zoom-in duration-300">
-           <div className="w-full max-w-5xl">
-              <div className="flex justify-between items-center mb-16">
-                 <h2 className="text-5xl font-extralight text-stone-900 tracking-tighter">Surface Apps</h2>
-                 <button 
-                  onClick={() => setIsLauncherOpen(false)}
-                  className="p-4 rounded-full bg-white/20 hover:bg-white/40 border border-white/40 transition-all"
-                 >
-                    <XMarkIcon className="w-8 h-8 text-stone-800" />
-                 </button>
-              </div>
-              <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-12">
-                {APPS.map((app) => (
-                  <button 
-                    key={app.id} 
-                    onClick={() => launchApp(app.id)}
-                    className="flex flex-col items-center group gap-4"
-                  >
-                    <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center ${app.color} shadow-2xl transition-all duration-500 transform group-hover:scale-110 group-active:scale-95 group-hover:-translate-y-4`}>
-                      <div className="scale-[1.8]">{app.icon}</div>
-                    </div>
-                    <span className="text-stone-800 font-semibold text-sm tracking-wide opacity-60 group-hover:opacity-100 transition-opacity">
-                      {app.name}
-                    </span>
-                  </button>
+        <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center p-20 animate-in fade-in zoom-in-95 duration-700 bg-white/20 backdrop-blur-3xl overflow-hidden">
+           
+           <div className="flex flex-col items-center mb-16 text-center animate-in slide-in-from-top-4 duration-1000">
+              <h2 className="text-5xl font-black text-stone-900 tracking-tighter italic uppercase">The Universe</h2>
+              <p className="text-[10px] mt-2 text-stone-400 font-black uppercase tracking-[0.5em]">Section {launcherPage + 1} of {totalPages}</p>
+           </div>
+
+           <div className="absolute left-10 top-1/2 -translate-y-1/2 z-10">
+              <button 
+                disabled={launcherPage === 0}
+                onClick={() => setLauncherPage(p => Math.max(0, p - 1))}
+                className="p-6 rounded-full bg-white/40 hover:bg-white shadow-xl transition-all disabled:opacity-0 disabled:pointer-events-none group border border-white/60"
+              >
+                <ChevronLeftIcon className="w-8 h-8 text-stone-900 group-hover:-translate-x-1 transition-transform" />
+              </button>
+           </div>
+           <div className="absolute right-10 top-1/2 -translate-y-1/2 z-10">
+              <button 
+                disabled={launcherPage === totalPages - 1}
+                onClick={() => setLauncherPage(p => Math.min(totalPages - 1, p + 1))}
+                className="p-6 rounded-full bg-white/40 hover:bg-white shadow-xl transition-all disabled:opacity-0 disabled:pointer-events-none group border border-white/60"
+              >
+                <ChevronRightIcon className="w-8 h-8 text-stone-900 group-hover:translate-x-1 transition-transform" />
+              </button>
+           </div>
+
+           <div className="w-full max-w-6xl relative overflow-hidden h-[500px]">
+              <div 
+                className="flex transition-transform duration-[800ms] ease-[cubic-bezier(0.23,1,0.32,1)] h-full"
+                style={{ transform: `translateX(-${launcherPage * 100}%)` }}
+              >
+                {Array.from({ length: totalPages }).map((_, pageIdx) => (
+                  <div key={pageIdx} className="w-full min-w-full h-full grid grid-cols-5 gap-y-10 gap-x-8 px-10">
+                    {APPS.slice(pageIdx * APPS_PER_PAGE, (pageIdx + 1) * APPS_PER_PAGE).map((app) => (
+                      <button 
+                        key={app.id} 
+                        onClick={() => launchApp(app.id)}
+                        className="flex flex-col items-center group"
+                      >
+                        <div className={`w-[76px] h-[76px] rounded-[26px] flex items-center justify-center ${app.color} shadow-lg transition-all duration-500 transform group-hover:-translate-y-4 group-hover:scale-[1.12] group-active:scale-95 group-hover:shadow-[0_30px_60px_rgba(0,0,0,0.1)]`}>
+                          <div className="scale-[1.6]">{app.icon}</div>
+                        </div>
+                        <span className="mt-5 text-stone-800 font-black text-[8px] uppercase tracking-[0.3em] opacity-30 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          {app.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 ))}
               </div>
            </div>
+
+           <div className="mt-16 flex gap-3">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setLauncherPage(i)}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${launcherPage === i ? 'w-10 bg-stone-900 shadow-lg' : 'w-2 bg-stone-900/10 hover:bg-stone-900/20'}`}
+                />
+              ))}
+           </div>
+
+           <button 
+             onClick={() => setIsLauncherOpen(false)}
+             className="absolute bottom-16 px-10 py-3 rounded-full bg-white/40 border border-white/60 text-stone-900 font-black uppercase tracking-widest text-[8px] hover:bg-white hover:shadow-2xl transition-all duration-500"
+           >
+             Collapse Library
+           </button>
         </div>
       )}
 
-      {/* Bottom Shell */}
       <Dock 
         onLaunch={launchApp} 
-        onToggleLauncher={() => setIsLauncherOpen(!isLauncherOpen)}
+        onToggleLauncher={() => {
+          setIsLauncherOpen(!isLauncherOpen);
+          setLauncherPage(0);
+        }}
         activeApps={windows.map(w => w.appId)}
         focusedAppId={focusedAppId}
       />

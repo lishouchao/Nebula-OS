@@ -1,8 +1,17 @@
 
-// Fix: Import React to resolve React.ReactNode namespace error
 import React from 'react';
 
-export type AppID = 'explorer' | 'terminal' | 'settings' | 'nebula-ai' | 'weather';
+export type AppID = 
+  | 'explorer' | 'terminal' | 'settings' | 'nebula-ai' | 'weather'
+  | 'atlas' | 'memo' | 'chronos' | 'post' | 'gallery' 
+  | 'audio' | 'vision' | 'path' | 'compute' | 'feed'
+  | 'pulse' | 'circles' | 'relay' | 'flow' | 'shield'
+  | 'core' | 'crypt' | 'lens' | 'canvas' | 'vital'
+  // 新增 20 个应用
+  | 'aura' | 'nexus' | 'vortex' | 'forge' | 'draft'
+  | 'sheet' | 'arcade' | 'stock' | 'voice' | 'scan'
+  | 'print' | 'git' | 'docker' | 'cloud' | 'sync'
+  | 'market' | 'book' | 'news' | 'radio' | 'studio';
 
 export interface WindowState {
   id: string;

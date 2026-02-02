@@ -4,8 +4,8 @@ import {
   WifiIcon, 
   SpeakerWaveIcon, 
   Battery50Icon,
-  ChevronDownIcon
-} from '@heroicons/react/24/solid';
+  MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
 
 interface TopBarProps {
   onToggleOverview: () => void;
@@ -21,33 +21,39 @@ const TopBar: React.FC<TopBarProps> = ({ onToggleOverview, isOverviewOpen }) => 
   }, []);
 
   return (
-    <div className={`h-8 w-full transition-all duration-500 flex items-center justify-between px-6 text-stone-800 text-xs font-semibold z-[3000] ${
-      isOverviewOpen ? 'bg-transparent' : 'shell-glass'
-    }`}>
-      <div className="flex items-center gap-6">
+    <div className="fixed top-6 left-0 right-0 flex justify-center z-[3000] pointer-events-none">
+      <div className={`
+        pointer-events-auto flex items-center gap-6 px-6 py-2 rounded-full transition-all duration-700
+        ${isOverviewOpen 
+          ? 'bg-stone-900 text-white shadow-[0_20px_40px_rgba(0,0,0,0.3)] scale-110' 
+          : 'bg-white/80 backdrop-blur-2xl border border-white/40 shadow-[0_10px_30px_rgba(0,0,0,0.05)] text-stone-800'}
+      `}>
         <button 
           onClick={onToggleOverview}
-          className={`px-3 py-0.5 rounded-full transition-all cursor-pointer ${
-            isOverviewOpen ? 'bg-stone-900 text-white scale-110' : 'hover:bg-black/5 text-stone-800'
-          }`}
+          className="flex items-center gap-2 group"
         >
-          <strong>Activities</strong>
+          <div className="relative flex items-center justify-center">
+             <div className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${isOverviewOpen ? 'bg-blue-400' : 'bg-stone-900 group-hover:scale-150'}`} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] ml-1">Flow</span>
         </button>
-        <div className="flex items-center gap-3 opacity-60 font-medium">
-          <span>Nebula Core</span>
+
+        <div className="h-3 w-[1px] bg-stone-200/50 mx-1" />
+        
+        <div className="flex flex-col items-center min-w-[70px]">
+          <span className="text-[12px] font-bold tracking-tight">
+            {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
         </div>
-      </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 hover:bg-black/5 px-4 py-0.5 rounded transition-colors cursor-default tracking-tight">
-        {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-      </div>
+        <div className="h-3 w-[1px] bg-stone-200/50 mx-1" />
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3 hover:bg-black/5 px-2 py-0.5 rounded transition-colors cursor-default group">
-          <WifiIcon className="w-3.5 h-3.5 opacity-70" />
-          <SpeakerWaveIcon className="w-3.5 h-3.5 opacity-70" />
-          <Battery50Icon className="w-3.5 h-3.5 opacity-70" />
-          <ChevronDownIcon className="w-3 h-3 opacity-30 group-hover:opacity-100" />
+        <div className="flex items-center gap-4 opacity-60">
+          <WifiIcon className="w-3.5 h-3.5" />
+          <Battery50Icon className="w-3.5 h-3.5" />
+          <div className="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center cursor-pointer hover:bg-stone-200 transition-colors">
+            <MagnifyingGlassIcon className="w-3 h-3 text-stone-600" />
+          </div>
         </div>
       </div>
     </div>
