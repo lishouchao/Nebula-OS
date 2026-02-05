@@ -4,15 +4,17 @@ import {
   WifiIcon, 
   SpeakerWaveIcon, 
   Battery50Icon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  PowerIcon
 } from '@heroicons/react/24/outline';
 
 interface TopBarProps {
   onToggleOverview: () => void;
   isOverviewOpen: boolean;
+  onOpenPowerMenu: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onToggleOverview, isOverviewOpen }) => {
+const TopBar: React.FC<TopBarProps> = ({ onToggleOverview, isOverviewOpen, onOpenPowerMenu }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -51,8 +53,16 @@ const TopBar: React.FC<TopBarProps> = ({ onToggleOverview, isOverviewOpen }) => 
         <div className="flex items-center gap-4 opacity-60">
           <WifiIcon className="w-3.5 h-3.5" />
           <Battery50Icon className="w-3.5 h-3.5" />
-          <div className="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center cursor-pointer hover:bg-stone-200 transition-colors">
-            <MagnifyingGlassIcon className="w-3 h-3 text-stone-600" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center cursor-pointer hover:bg-stone-200 transition-colors">
+              <MagnifyingGlassIcon className="w-3.5 h-3.5 text-stone-600" />
+            </div>
+            <button 
+              onClick={onOpenPowerMenu}
+              className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center cursor-pointer hover:bg-rose-100 transition-colors group"
+            >
+              <PowerIcon className="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform" />
+            </button>
           </div>
         </div>
       </div>

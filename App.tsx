@@ -10,8 +10,13 @@ import Terminal from './components/apps/Terminal';
 import NebulaAI from './components/apps/NebulaAI';
 import Settings from './components/apps/Settings';
 import Weather from './components/apps/Weather';
+import Draft from './components/apps/Draft';
+import Compute from './components/apps/Compute';
+import CoreMonitor from './components/apps/CoreMonitor';
+import Gallery from './components/apps/Gallery';
+import Chronos from './components/apps/Chronos';
 import Overview from './components/Overview';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, PowerIcon as PowerOffIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const APPS_PER_PAGE = 20;
 
@@ -20,6 +25,8 @@ const App: React.FC = () => {
   const [zIndexCounter, setZIndexCounter] = useState(10);
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
+  const [isPowerMenuOpen, setIsPowerMenuOpen] = useState(false);
+  const [isSystemOff, setIsSystemOff] = useState(false);
   const [launcherPage, setLauncherPage] = useState(0);
   const [wallpaper, setWallpaper] = useState(DEFAULT_WALLPAPER);
 
@@ -73,6 +80,14 @@ const App: React.FC = () => {
     setIsLauncherOpen(false);
   };
 
+  const handleShutdown = () => {
+    setIsPowerMenuOpen(false);
+    setIsSystemOff(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 3000);
+  };
+
   const renderAppContent = (appId: AppID) => {
     switch (appId) {
       case 'explorer': return <Explorer />;
@@ -80,6 +95,11 @@ const App: React.FC = () => {
       case 'nebula-ai': return <NebulaAI />;
       case 'settings': return <Settings currentWallpaper={wallpaper} onWallpaperChange={setWallpaper} />;
       case 'weather': return <Weather />;
+      case 'draft': return <Draft />;
+      case 'compute': return <Compute />;
+      case 'core': return <CoreMonitor />;
+      case 'gallery': return <Gallery />;
+      case 'chronos': return <Chronos />;
       default: return (
         <div className="flex flex-col items-center justify-center h-full text-stone-300 p-8 text-center bg-white">
           <div className="w-24 h-24 mb-6 rounded-[32px] bg-stone-50 flex items-center justify-center border border-stone-100">
@@ -94,21 +114,34 @@ const App: React.FC = () => {
 
   const focusedAppId = windows.find(w => w.isFocused)?.appId;
 
+  if (isSystemOff) {
+    return (
+      <div className="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center animate-out fade-out fill-mode-forwards duration-[2000ms]">
+        <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin mb-8" />
+        <span className="text-white font-black uppercase tracking-[0.8em] text-[10px] animate-pulse">Nebula OS Powering Down</span>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#fafafa] transition-all duration-1000">
       <div 
         className={`absolute inset-0 bg-cover bg-center transition-all duration-[1.2s] ease-[cubic-bezier(0.23,1,0.32,1)] ${
-          isLauncherOpen || isOverviewOpen ? 'scale-110 saturate-[0.8] brightness-110 blur-[60px]' : 'scale-100 blur-0'
+          isLauncherOpen || isOverviewOpen || isPowerMenuOpen ? 'scale-110 saturate-[0.8] brightness-110 blur-[60px]' : 'scale-100 blur-0'
         }`}
         style={{ backgroundImage: `url(${wallpaper})` }}
       />
       
-      <div className={`absolute inset-0 bg-white/5 pointer-events-none transition-opacity duration-1000 ${isOverviewOpen ? 'opacity-100' : 'opacity-0'}`} />
+      <div className={`absolute inset-0 bg-white/5 pointer-events-none transition-opacity duration-1000 ${isOverviewOpen || isPowerMenuOpen ? 'opacity-100' : 'opacity-0'}`} />
 
-      <TopBar onToggleOverview={toggleOverview} isOverviewOpen={isOverviewOpen} />
+      <TopBar 
+        onToggleOverview={toggleOverview} 
+        isOverviewOpen={isOverviewOpen} 
+        onOpenPowerMenu={() => setIsPowerMenuOpen(true)}
+      />
 
       <div className={`relative w-full h-full transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] ${
-        isOverviewOpen ? 'scale-90 opacity-0 blur-2xl pointer-events-none' : 'scale-100 opacity-100'
+        isOverviewOpen || isPowerMenuOpen ? 'scale-90 opacity-0 blur-2xl pointer-events-none' : 'scale-100 opacity-100'
       }`}>
         {windows.map((win) => (
           <Window
@@ -132,6 +165,47 @@ const App: React.FC = () => {
           onFocusWindow={focusWindow} 
           onClose={() => setIsOverviewOpen(false)}
         />
+      )}
+
+      {/* Power Menu Overlay */}
+      {isPowerMenuOpen && (
+        <div className="absolute inset-0 z-[4000] flex items-center justify-center p-6 animate-in fade-in zoom-in-95 duration-500 bg-stone-900/40 backdrop-blur-3xl">
+           <div className="max-w-lg w-full flex flex-col items-center">
+              <div className="mb-16 text-center">
+                <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase mb-2">Power Actions</h2>
+                <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em]">Choose your next destination</p>
+              </div>
+
+              <div className="flex gap-8 mb-16">
+                 <button 
+                  onClick={() => setIsSystemOff(true)}
+                  className="group flex flex-col items-center gap-6"
+                 >
+                    <div className="w-24 h-24 rounded-[32px] bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-500 shadow-2xl">
+                       <ArrowPathIcon className="w-10 h-10 text-white group-hover:text-stone-900 transition-colors" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60 group-hover:text-white transition-colors">Restart</span>
+                 </button>
+
+                 <button 
+                  onClick={handleShutdown}
+                  className="group flex flex-col items-center gap-6"
+                 >
+                    <div className="w-24 h-24 rounded-[32px] bg-rose-500/80 border border-rose-400 flex items-center justify-center group-hover:bg-rose-500 group-hover:scale-110 transition-all duration-500 shadow-2xl">
+                       <PowerOffIcon className="w-10 h-10 text-white" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/60 group-hover:text-white transition-colors">Shut Down</span>
+                 </button>
+              </div>
+
+              <button 
+                onClick={() => setIsPowerMenuOpen(false)}
+                className="px-8 py-3 rounded-full bg-white/10 border border-white/20 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/20 transition-all"
+              >
+                Return to Flow
+              </button>
+           </div>
+        </div>
       )}
 
       {isLauncherOpen && (

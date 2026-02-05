@@ -80,18 +80,21 @@ const Window: React.FC<WindowProps> = ({
         onMouseDown={handleMouseDown}
       >
         <div className="flex-1 flex justify-start">
-           <div className="flex gap-2.5">
+           <div className="flex gap-2.5 group/controls">
+            {/* Close Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-red-400 transition-colors flex items-center justify-center group"
+              className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-red-500 transition-all duration-300 flex items-center justify-center group/btn shadow-sm"
             >
-              <XMarkIcon className="w-2.5 h-2.5 text-red-900 opacity-0 group-hover:opacity-100" />
+              <XMarkIcon className="w-2 h-2 text-stone-600 group-hover/btn:text-white transition-opacity opacity-0 group-hover/controls:opacity-100" />
             </button>
-            <button className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-stone-300 transition-colors flex items-center justify-center group">
-              <MinusIcon className="w-2.5 h-2.5 text-stone-800 opacity-0 group-hover:opacity-100" />
+            {/* Minimize Button */}
+            <button className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-amber-400 transition-all duration-300 flex items-center justify-center group/btn shadow-sm">
+              <MinusIcon className="w-2 h-2 text-stone-600 group-hover/btn:text-white transition-opacity opacity-0 group-hover/controls:opacity-100" />
             </button>
-            <button className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-stone-300 transition-colors flex items-center justify-center group">
-              <ArrowsPointingOutIcon className="w-2.5 h-2.5 text-stone-800 opacity-0 group-hover:opacity-100" />
+            {/* Maximize Button */}
+            <button className="w-3.5 h-3.5 rounded-full bg-stone-200 hover:bg-emerald-500 transition-all duration-300 flex items-center justify-center group/btn shadow-sm">
+              <ArrowsPointingOutIcon className="w-2 h-2 text-stone-600 group-hover/btn:text-white transition-opacity opacity-0 group-hover/controls:opacity-100" />
             </button>
           </div>
         </div>
